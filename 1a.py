@@ -22,9 +22,12 @@ def aufgabe4():
 
 def aufgabe5():
     a = "my zipper is really zippy"
+    # Lösung 1
     offset = (a.find("zip"))+3
     short = a[offset:]
     print(short.find("zip") + offset)
+    # Lösung 2
+    print(a.find("zip", a.find("zip")+1))
 
 def aufgabe6():
     x = random.uniform(0, 10)
@@ -34,5 +37,5 @@ def aufgabe6():
 
 #aufgabe1()
 #aufgabe4()
-aufgabe6()
+aufgabe5()
 
