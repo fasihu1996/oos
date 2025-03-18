@@ -1,6 +1,5 @@
 import random
 
-
 def aufgabe1():
     a = 7
     x = 3
