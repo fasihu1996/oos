@@ -23,6 +23,10 @@ def hauptstaedte():
 # hauptstaedte()
 
 def check_sudoku(square, limit):
+    """Diese Funktion akzeptiert eine quadratisch verschachtelte Liste, sowie ein
+    Limit als Größe der einzelen Quadratboxen. Sie geht jede Reihe, Spalte und Box
+    durch und fügt einzigartige Zahlen einer Menge hinzu. Falls eine Zahl zweimal
+    auftaucht, wird False und die Fehlerstelle ausgegeben."""
     size = len(square)
     rows = set()
     columns = set()
@@ -95,6 +99,8 @@ sudoku2 = [[4,2,3,1,5,6],
 print(check_sudoku(sudoku_invalid, 2))
 
 def med_avg(*args):
+    """Diese Funktion akzeptiert eine beliebe Anzahl von Argumenten
+    und berechnet den Median und Durchschnitt der Eingaben"""
     zahlen = []
     length = len(args)
     for e in args:
