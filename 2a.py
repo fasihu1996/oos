@@ -22,48 +22,67 @@ def hauptstaedte():
 
 # hauptstaedte()
 
-def check_sudoku(square):
+def check_sudoku(square, limit):
     size = len(square)
-    i = j = 0
-    k = l = 0
     rows = set()
     columns = set()
-    print("Zeilen: ")
-    while i < size:
-        while j < size:
+    boxes = set()
+
+    # Jede Reihe auf Gültigkeit prüfen
+    for i in range(size):
+        for j in range(size):
             value = square[i][j]
             print(value)
             if value != 0:
                 if value in rows:
+                    print(f"Das Sudoku enthält einen Reihenfehler in Zeile {i+1} und Spalte {j+1}")
                     return False
                 else:
                     rows.add(value)
             j+=1
         rows.clear()
-        i+=1
-        j = 0
-    print("Spalten: ")
-    i = j = 0
-    while i < size:
-        while j < size:
+
+    # Gleicher Loop aber für Spalten
+    for i in range(size):
+        for j in range(size):
             value = square[j][i]
             print(value)
             if value != 0:
                 if value in columns:
+                    print(f"Das Sudoku enthält einen Spaltenfehler in Zeile {j+1} und Spalte {i+1}")
                     return False
                 else:
                     columns.add(value)
-            j += 1
         columns.clear()
-        i += 1
-        j = 0
+
+    # doppelt verschachtelter Loop, jede Box prüfen, darin jedes Zeile/Spalte prüfen
+    for box_row in range(0, size, limit):
+        for box_column in range(0, size, limit):
+            for i in range (box_column, box_row, limit):
+                for j in range (box_column, box_row, limit):
+                    value = square[i][j]
+                    if value != 0:
+                        if value in boxes:
+                            print(f"Das Sudoku enthält einen Boxfehler an der Stelle: {i} {j}")
+                            return False
+                        else:
+                            boxes.add(value)
+            boxes.clear()
+
+    # falls vorher kein false ausgegeben wurde, ist das Sudoku gültig
     return True
 
 
-sudoku = [[4,2,3,1],
-          [2,0,0,0],
-          [1,3,2,0],
-          [3,0,3,2]
+sudoku_invalid = [[4,2,3,1],
+                  [2,0,0,0],
+                  [1,3,2,0],
+                  [3,0,3,2]
+]
+
+sudoku_valid = [[4,1,3,2],
+                [3,2,4,0],
+                [2,4,1,3],
+                [1,3,2,4]
 ]
 
 sudoku2 = [[4,2,3,1,5,6],
@@ -73,7 +92,7 @@ sudoku2 = [[4,2,3,1,5,6],
            [0,0,4,0,0,0],
            [3,0,1,2,5,0]
 ]
-print(check_sudoku(sudoku2))
+print(check_sudoku(sudoku_invalid, 2))
 
 def med_avg(*args):
     input = []
