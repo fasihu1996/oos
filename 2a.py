@@ -95,19 +95,19 @@ sudoku2 = [[4,2,3,1,5,6],
 print(check_sudoku(sudoku_invalid, 2))
 
 def med_avg(*args):
-    input = []
+    zahlen = []
     length = len(args)
     for e in args:
-        input.append(e)
-    input.sort()
-    sum = 0
-    for i in input:
-        sum += i
-    average = sum / length
+        zahlen.append(e)
+    zahlen.sort()
+    summe = 0
+    for i in zahlen:
+        summe += i
+    average = summe / length
     if length % 2 == 0:
-        med = (input[int(length/2)] + input[int((length/2) + 1)])
+        med = (zahlen[int(length/2)] + zahlen[int((length/2) + 1)])
     else:
-        med = input[int(length/2)]
+        med = zahlen[int(length/2)]
     return average, med
 
 print(med_avg(12,69,56,113,1))
