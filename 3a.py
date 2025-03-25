@@ -31,10 +31,10 @@ fasih = Student("Uddin", "Fasih", 12345)
 print(fasih)
 print(Student.get_no_of_students())
 
-
 def get_urls(url):
+    """Diese Funktion liest von einer gegebenen URL die Anchor-Tags mit einem href aus
+    und gibt die entsprechendend Keywords dazu zurück"""
     r  = requests.get(url)
-    #print(r.text)
     soup = BeautifulSoup(r.content, 'html.parser')
     website_urls = []
     for link in soup('a', href=True):
@@ -51,8 +51,8 @@ def print_urls(urls_with_keywords):
         print("-" * 40)
 
 urls, count = get_urls('https://th-brandenburg.de')
-#print_urls(urls)
-#print(f"Total URLs found: {count}")
-#print(get_urls('https://th-brandenburg.de'))
+# Uncomment the following lines to print the URLs and their count
+# print_urls(urls)
+# print(f"Total URLs found: {count}")
 
 
