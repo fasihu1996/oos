@@ -18,12 +18,11 @@ def recorder(url, filename, duration, blocksize):
 
     conn = sqlite3.connect('recordings.db')
     c = conn.cursor()
-    current_time = start_time.time().strftime("%H:%M:%S")
 
     c.execute('''CREATE TABLE IF NOT EXISTS recordings
                  (identifier INTEGER PRIMARY KEY, url TEXT, filename TEXT, date TEXT, time TEXT, duration INTEGER)''')
     c.execute("INSERT INTO recordings (url, filename, date, time, duration) VALUES (?, ?, ?, ?, ?)",
-              (url, filename, start_time.date().isoformat(), current_time, duration))
+              (url, filename, start_time.date().isoformat(), start_time.time().strftime("%H:%M:%S"), duration))
     conn.commit()
     print("\nRecording successfully saved and logged in database.\n")
     list_recordings()
@@ -31,20 +30,23 @@ def recorder(url, filename, duration, blocksize):
 
 def list_recordings():
     """List all recordings from the database."""
-    conn = sqlite3.connect('recordings.db')
-    c = conn.cursor()
-    c.execute("SELECT COUNT(*) FROM recordings")
-    count = c.fetchone()
-    if count == 0:
-        print("No recordings found!")
-    else:
-        c.execute("SELECT * FROM recordings")
-        rows = c.fetchall()
-        print(f"{'IDs':3}{'Title':>20}   {'URL':<60}{'Date':>15}{'Timestamp':>15}{'Length':>10}")
-        for row in rows:
-            identifier, url, title, date, time, duration = row
-            print(f"{identifier:3}{title:>20}   {url:<60}{date:>15}{time:>15}{duration:>10}")
-    conn.close()
+    try:
+        conn = sqlite3.connect('recordings.db')
+        c = conn.cursor()
+        c.execute("SELECT COUNT(*) FROM recordings")
+        count = c.fetchone()[0]
+        if count == 0:
+            print("The database currently contains no recordings!")
+        else:
+            c.execute("SELECT * FROM recordings")
+            rows = c.fetchall()
+            print(f"{'IDs':3}{'Title':>20}   {'URL':<60}{'Date':>15}{'Timestamp':>15}{'Length':>10}")
+            for row in rows:
+                identifier, url, title, date, time, duration = row
+                print(f"{identifier:3}{title:>20}   {url:<60}{date:>15}{time:>15}{duration:>10}")
+        conn.close()
+    except sqlite3.OperationalError:
+        print("An error occurred while reading the database. It may not exist or be corrupted.")
 
 def clear_database():
     """Clears all entries from the database"""
@@ -71,8 +73,8 @@ def main():
     Options:
       -h --help             Show this screen.
       --filename=<name>     Name of recording [default: myRadio].
-      --duration=<time>     Duration of recording in seconds [default: 30].
-      --blocksize=<size>    Block size for read/write in bytes [default: 64].
+      --duration=<time>     Duration of recording in seconds [default: 5].
+      --blocksize=<size>    Block size for read/write in bytes [default: 128].
       -l --list             List all recordings.
       -c --clear            Clear the database.
     """
