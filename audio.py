@@ -1,4 +1,6 @@
 import urllib.request
+import certifi
+import ssl
 import datetime as dt
 import sys
 import sqlite3
@@ -7,20 +9,22 @@ from docopt import docopt
 def recorder(url, filename, duration, blocksize):
     """Record audio stream from the given URL."""
     print(f"Recording from {url} to {filename}.mp3 for {duration} seconds with blocksize {blocksize}")
-    stream = urllib.request.urlopen(url)
+    ssl_context = ssl.create_default_context(cafile=certifi.where())
+    stream = urllib.request.urlopen(url, context=ssl_context)
     start_time = dt.datetime.now()
+    blocks = duration * 16000 / blocksize
 
     with open(f"{filename}.mp3", 'wb') as f:
         while (dt.datetime.now() - start_time).seconds < int(duration):
             f.write(stream.read(int(blocksize)))
 
-    # Save metadata to database
+
     conn = sqlite3.connect('recordings.db')
     c = conn.cursor()
     c.execute('''CREATE TABLE IF NOT EXISTS recordings
-                 (url TEXT, filename TEXT, date TEXT, time TEXT, duration INTEGER)''')
-    c.execute("INSERT INTO recordings (url, filename, date, time, duration) VALUES (?, ?, ?, ?, ?)",
-              (url, filename, start_time.date(), start_time.time(), duration))
+                 (url TEXT, filename TEXT, date TEXT, duration INTEGER)''')
+    c.execute("INSERT INTO recordings (url, filename, date, duration) VALUES (?, ?, ?, ?)",
+              (url, filename, start_time.date(), duration))
     conn.commit()
     res = c.execute("SELECT * FROM recordings")
     print(res.fetchall())
