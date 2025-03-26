@@ -8,6 +8,6 @@ def small_words(eingabe):
 
 if __name__ == '__main__':
     words = ['a', 'ab', 'abc', 'abcd', 'abcde']
-    result = small_words(words)
-    for r in result:
+    res = (word for word in small_words(words))
+    for r in res:
         print(r)
