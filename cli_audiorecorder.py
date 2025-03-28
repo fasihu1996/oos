@@ -1,32 +1,38 @@
-import urllib.request, certifi, ssl, os, datetime as dt, sqlite3
+import urllib.request, urllib.error, certifi, ssl, os, datetime as dt, sqlite3
+
 from docopt import docopt
 
 def recorder(url, filename, duration, blocksize):
     """Record audio stream from the given URL."""
     print(f"Recording from {url} to {filename}.mp3 for {duration} seconds with blocksize {blocksize}")
     ssl_context = ssl.create_default_context(cafile=certifi.where())
-    stream = urllib.request.urlopen(url, context=ssl_context)
-    start_time = dt.datetime.now()
-    blocks_target = int(duration) * 16000 / int(blocksize)
-    blocks_written = 0
+    try:
+        stream = urllib.request.urlopen(url, context=ssl_context)
+        stream_bitrate = 128 * int(stream.headers.get('icy-br'))
+        start_time = dt.datetime.now()
+        blocks_target = int(duration) * stream_bitrate / int(blocksize)
+        blocks_written = 0
 
-    with open(f"{filename}.mp3", 'wb') as f:
-        while blocks_written < blocks_target:
-            f.write(stream.read(int(blocksize)))
-            blocks_written += 1
+        with open(f"{filename}.mp3", 'wb') as f:
+            while blocks_written < blocks_target:
+                f.write(stream.read(int(blocksize)))
+                blocks_written += 1
 
 
-    conn = sqlite3.connect('recordings.db')
-    c = conn.cursor()
 
-    c.execute('''CREATE TABLE IF NOT EXISTS recordings
-                 (identifier INTEGER PRIMARY KEY, url TEXT, filename TEXT, date TEXT, time TEXT, duration INTEGER)''')
-    c.execute("INSERT INTO recordings (url, filename, date, time, duration) VALUES (?, ?, ?, ?, ?)",
-              (url, filename, start_time.date().isoformat(), start_time.time().strftime("%H:%M:%S"), duration))
-    conn.commit()
-    print("\nRecording successfully saved and logged in database.\n")
-    list_recordings()
-    conn.close()
+        conn = sqlite3.connect('recordings.db')
+        c = conn.cursor()
+
+        c.execute('''CREATE TABLE IF NOT EXISTS recordings
+                     (identifier INTEGER PRIMARY KEY, url TEXT, filename TEXT, date TEXT, time TEXT, duration INTEGER)''')
+        c.execute("INSERT INTO recordings (url, filename, date, time, duration) VALUES (?, ?, ?, ?, ?)",
+                  (url, filename, start_time.date().isoformat(), start_time.time().strftime("%H:%M:%S"), duration))
+        conn.commit()
+        print("\nRecording successfully saved and logged in database.\n")
+        list_recordings()
+        conn.close()
+    except urllib.error.HTTPError:
+        print("A HTTP error occurred while attempting to connect to the resource.")
 
 def list_recordings():
     """List all recordings from the database."""
@@ -53,6 +59,7 @@ def clear_database():
     if os.path.isfile('recordings.db'):
         conn = sqlite3.connect('recordings.db')
         c = conn.cursor()
+        # noinspection SqlWithoutWhere
         c.execute("DELETE FROM recordings")
         conn.commit()
         conn.close()
