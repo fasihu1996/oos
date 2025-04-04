@@ -88,7 +88,7 @@ def main():
     doc = """Audiorecorder
 
     Usage:
-      cli_audiorecorder.py <url> [--filename=<name>] [--duration=<time>] [--blocksize=<size>]
+      cli_audiorecorder.py <url> [--filename=<name> --duration=<time> --blocksize=<size>]
       cli_audiorecorder.py -l | --list
       cli_audiorecorder.py -h | --help
       cli_audiorecorder.py -c | --clear
