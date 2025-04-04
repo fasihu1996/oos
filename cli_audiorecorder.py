@@ -10,8 +10,7 @@ def recorder(url, filename, duration, blocksize):
         raise ValueError("Blocksize cannot be smaller than 1!")
     if filename is None:
         now = dt.datetime.now()
-        formatted = now.strftime("%Y-%m-%d-%H-%M-%S")
-        filename = formatted
+        filename = now.strftime("%Y-%m-%d-%H-%M-%S")
 
     print(f"Recording from {url} to {filename}.mp3 for {duration} seconds with blocksize {blocksize}")
     ssl_context = ssl.create_default_context(cafile=certifi.where())
