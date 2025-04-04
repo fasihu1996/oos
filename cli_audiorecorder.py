@@ -1,4 +1,4 @@
-import urllib.request, urllib.error, certifi, ssl, os, datetime as dt, sqlite3
+import urllib.request, urllib.error, certifi, ssl, datetime as dt, sqlite3
 
 from docopt import docopt
 
