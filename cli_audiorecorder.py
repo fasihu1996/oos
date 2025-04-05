@@ -1,6 +1,10 @@
+import os
 import urllib.request, urllib.error, certifi, ssl, datetime as dt, sqlite3
+from termcolor import colored
 
 from docopt import docopt
+os.system('color')
+
 
 def recorder(url, filename, duration, blocksize):
     """Record audio stream from the given URL."""
@@ -12,7 +16,7 @@ def recorder(url, filename, duration, blocksize):
         now = dt.datetime.now()
         filename = now.strftime("%Y-%m-%d-%H-%M-%S")
 
-    print(f"Recording from {url} to {filename}.mp3 for {duration} seconds with blocksize {blocksize}")
+    print(colored(f"\nRecording from {url} to {filename}.mp3 for {duration} seconds with blocksize {blocksize}\n", 'blue'))
     ssl_context = ssl.create_default_context(cafile=certifi.where())
     try:
         stream = urllib.request.urlopen(url, context=ssl_context)
@@ -36,15 +40,15 @@ def recorder(url, filename, duration, blocksize):
         c.execute("INSERT INTO recordings (url, filename, date, time, duration) VALUES (?, ?, ?, ?, ?)",
                   (url, filename, start_time.date().isoformat(), start_time.time().strftime("%H:%M:%S"), duration))
         conn.commit()
-        print("\nRecording successfully saved and logged in database.\n")
+        print(colored("SUCCESS: Recording successfully saved and logged in database.\n", 'green'))
         list_recordings(0)
         conn.close()
     except urllib.error.HTTPError:
-        print("\nERROR: A HTTP error occurred while attempting to connect to the resource. Please check the URL.")
+        print(colored("\nERROR: A HTTP error occurred while attempting to connect to the resource. Please check the URL.", 'red'))
     except TypeError:
-        print("\nERROR: The provided URL does not have a valid mp3 stream")
+        print(colored("\nERROR: The provided URL does not have a valid mp3 stream", 'red'))
     except ValueError:
-        print("\nERROR: The provided URL is not a valid web resource.")
+        print(colored("\nERROR: The provided URL is not a valid web resource.", 'red'))
 
 def list_recordings(fetch_all):
     """List all recordings from the database."""
@@ -54,7 +58,7 @@ def list_recordings(fetch_all):
         c.execute("SELECT COUNT(*) FROM recordings")
         count = c.fetchone()[0]
         if count == 0:
-            print("The database currently contains no recordings!")
+            print(colored("\nWARNING: The database currently contains no recordings!", 'yellow'))
         else:
             if fetch_all:
                 c.execute("SELECT * FROM recordings")
@@ -68,7 +72,7 @@ def list_recordings(fetch_all):
                 print(f"{identifier:3}{title:>20}   {url:<60}{date:>15}{time:>15}{duration:>10}")
         conn.close()
     except sqlite3.OperationalError:
-        print("\nERROR: An error occurred while reading the database. It may not exist or be corrupted.")
+        print(colored("\nERROR: An error occurred while reading the database. It may not exist or be corrupted.", 'red'))
 
 def clear_database():
     """Clears all entries from the database"""
@@ -79,13 +83,13 @@ def clear_database():
         c.execute("DELETE FROM recordings")
         conn.commit()
         conn.close()
-        return "The database has been cleared"
+        print(colored("SUCCESS: The database has been cleared.", 'green'))
     except sqlite3.OperationalError:
-        return "\nERROR: The database does not exist yet"
+        print(colored("\nERROR: The database does not exist yet.", 'red'))
 
 def main():
     """Main entry point for the script."""
-    doc = """Audiorecorder
+    doc = """Welche to Fasih's mp3 audiorecorder
 
     Usage:
       cli_audiorecorder.py <url> [--filename=<name> --duration=<time> --blocksize=<size>]
@@ -106,7 +110,7 @@ def main():
     if arguments['--list']:
         list_recordings(1)
     elif arguments['--clear']:
-        print(clear_database())
+        clear_database()
     else:
         url = arguments['<url>']
         filename = arguments['--filename']
