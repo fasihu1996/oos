@@ -20,9 +20,9 @@ def recorder(url, filename, duration, blocksize):
     ssl_context = ssl.create_default_context(cafile=certifi.where())
     try:
         stream = urllib.request.urlopen(url, context=ssl_context)
-        stream_bitrate = 128 * int(stream.headers.get('icy-br'))
+        stream_byterate = 128 * int(stream.headers.get('icy-br'))
         start_time = dt.datetime.now()
-        blocks_target = int(duration) * stream_bitrate / int(blocksize)
+        blocks_target = int(duration) * stream_byterate / int(blocksize)
         blocks_written = 0
 
         with open(f"{filename}.mp3", 'wb') as f:
