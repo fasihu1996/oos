@@ -107,6 +107,9 @@ def main():
     """
     arguments = docopt(doc)
 
+    if arguments['--filename'] is not None and arguments['--filename'] == "":
+        print(colored("\nERROR: You cannot specify an empty filename. Either add a filename or remove the --filename option.", 'red'))
+        return
     if arguments['--list']:
         list_recordings(1)
     elif arguments['--clear']:
