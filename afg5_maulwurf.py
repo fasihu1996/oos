@@ -8,11 +8,11 @@ from pygame.locals import *
 pygame.init()
 # DISPLAY CONFIGURATION
 # Fenstergröße festlegen
-WIDTH, HEIGHT = 800, 600
+WIDTH, HEIGHT = 1920, 1080
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
 # Fügen Sie hier den Titel des Fensters hinzu
-pygame.display.set_caption("Kollisionserkennung")
+pygame.display.set_caption("Hau den Maulwurf")
 
 # ENTITIES
 

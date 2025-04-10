@@ -37,7 +37,7 @@ clock = pygame.time.Clock()
 # Loop
 while keepGoing:
     # Timing
-    clock.tick(30) 
+    clock.tick(60)
     
     # Events
     x, y = pygame.mouse.get_pos()
@@ -58,13 +58,15 @@ while keepGoing:
                 selectedBrush = brush_black
             elif event.key == K_y:
                 selectedBrush = brush_yellow
+            elif event.key == K_c:
+                screen.fill((255, 255, 255))
+                pygame.display.update()
             elif event.key == K_p:
                 brush_size *= 2
                 brush_size_tuple = (brush_size, brush_size)
             elif event.key == K_m:
                 brush_size /= 2
                 brush_size_tuple = (brush_size, brush_size)
-
 
             
     # Refresh Display  

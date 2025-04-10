@@ -14,10 +14,10 @@ pygame.display.set_caption('Hau den Maulwurf')
 class Mole(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load('images/maulwurf.gif')
+        self.image = pygame.image.load('images/mole.png')
         self.image = pygame.transform.scale(self.image, (100,100))
         self.rect = self.image.get_rect()
-        self.sound = pygame.mixer.Sound('sounds/peng.wav')
+        self.sound = pygame.mixer.Sound('sounds/cry.mp3')
         self.rect.lef = random.randint(0,620)
         self.rect.top = random.randint(0, 460)
 
@@ -50,7 +50,7 @@ sprite_group = pygame.sprite.Group()
 sprite_group.add(mole)
 sprite_group.add(shovel)
 
-bg = pygame.image.load('images/rasen2.png')
+bg = pygame.image.load('images/background_grass.png')
 bg = pygame.transform.scale(bg, size)
 
 bg_red = pygame.Surface(size)
