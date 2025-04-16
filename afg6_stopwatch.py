@@ -17,20 +17,22 @@ class Stopwatch:
         self.time_label.pack(pady=10)
 
         # Buttons
-        self.start_stop_button = tk.Button(root, text="Start", font=("Helvetica", 12), width=10,
+        button_frame = tk.Frame(root)
+        button_frame.pack(pady=5)
+
+        self.start_stop_button = tk.Button(button_frame, text="Start", font=("Helvetica", 12), width=10,
                                            command=self.start_stop)
-        self.start_stop_button.pack(side="left", padx=5, pady=5)
+        self.start_stop_button.pack(side="left", padx=5)
 
-        self.reset_button = tk.Button(root, text="Reset", font=("Helvetica", 12), width=10, command=self.reset)
-        self.reset_button.pack(side="left", padx=5, pady=5)
+        self.reset_button = tk.Button(button_frame, text="Reset", font=("Helvetica", 12), width=10, command=self.reset)
+        self.reset_button.pack(side="left", padx=5)
 
-        # Hier soll der Button für die Laptimes (Rundenzeiten) hinzugefügt werden
-        self.lap_button = Button(root, text="Lap", font=("Helvetica", 12), width=10, command=self.record_lap)
-        self.lap_button.pack(side="left", padx=5, pady=5)
+        self.lap_button = Button(button_frame, text="Lap", font=("Helvetica", 12), width=10, command=self.record_lap)
+        self.lap_button.pack(side="left", padx=5)
 
-        # Hier soll die Listbox für die Laptimes (Rundenzeiten) hinzugefügt werden
+        # Listbox für die Laptimes (Rundenzeiten)
         self.listbox = Listbox(root, height=20)
-        self.listbox.pack(side="left", padx=5, pady=5)
+        self.listbox.pack(fill=BOTH, expand=True, padx=5, pady=5)
         # Stoppuhr-Aktualisierung starten
         self.update_clock()
 
