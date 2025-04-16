@@ -13,12 +13,14 @@ class Logbook:
         self.conn = sqlite3.connect('logbook.db')
         self.c = self.conn.cursor()
         self.c.execute('''CREATE TABLE IF NOT EXISTS logs(identifier INTEGER PRIMARY KEY, author TEXT,
-        entry TEXT, date TEXT, time TEXT)''')
+        entry TEXT, datestamp TEXT, timestamp TEXT)''')
         self.conn.commit()
 
+        # Init the overloaded ttk
         self.style = Style()
         self.style.configure("BW.TLabel", foreground="black", background="white")
 
+        # Create table
         self.table = Treeview(self.root, columns=("ID", "Author", "Entry", "Date", "Time"))
         self.table.pack(expand=YES, fill=BOTH)
         self.table.column("#0", width=1, minwidth=1)
@@ -35,10 +37,11 @@ class Logbook:
         self.table.heading("Time", text="Timestamp")
         self.curr_idx = 0
 
-
+        # New entry buttoon
         self.new_button = Button(self.root, text="Create new entry", command=self.new_entry)
         self.new_button.pack(side=RIGHT)
 
+        # Load existing entries from the db
         self.load_entries()
 
     def new_entry(self):
@@ -46,16 +49,19 @@ class Logbook:
         entry_window.geometry("400x300")
         entry_window.title("New Entry")
 
+        # Frame for author
         author_frame = Frame(entry_window)
         author_frame.pack(pady=10, fill=X)
         Label(author_frame, text="Author:", width=10, anchor=W).pack(side=LEFT, padx=5)
         author_entry = Entry(author_frame, width=40)
         author_entry.pack(side=LEFT, padx=5)
 
+        # Entry text area
         Label(entry_window, text="Entry:").pack(anchor=W, padx=5)
         entry_text = Text(entry_window, width=50, height=10)
         entry_text.pack(pady=5, padx=5)
 
+        # Button to save new entry
         Button(entry_window, text="Save entry", command=lambda: self.create_entry(entry_window, author_entry.get(), entry_text.get("1.0", "end-1c"))).pack(pady=10)
 
     def create_entry(self, entry_window, author, entry):
@@ -63,14 +69,14 @@ class Logbook:
         cur_date= now.strftime("%d/%m/%Y")
         cur_time = now.strftime("%H:%M:%S")
         self.table.insert("", "end", values=(self.curr_idx + 1, author, entry, cur_date, cur_time))
-        self.c.execute("INSERT INTO logs (author, entry, date, time) VALUES (?, ?, ?, ?)", (author, entry, cur_date, cur_time))
+        self.c.execute("INSERT INTO logs (author, entry, datestamp, timestamp) VALUES (?, ?, ?, ?)", (author, entry, cur_date, cur_time))
         self.conn.commit()
         self.curr_idx += 1
         entry_window.destroy()
         return messagebox.showinfo(title="Entry saved", message="Your entry has been successfully saved")
 
     def load_entries(self):
-        self.c.execute("SELECT identifier, author, entry FROM logs")
+        self.c.execute("SELECT identifier, author, entry, datestamp, timestamp FROM logs")
         rows = self.c.fetchall()
         for row in rows:
             self.table.insert("", "end", values=row)
