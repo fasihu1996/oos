@@ -258,3 +258,5 @@ update_treeview()
 status_bar = Label(root, text="Ready", anchor="w", relief="sunken")
 status_bar.grid(row=6, column=0, columnspan=2, sticky="nsew")
 
+if __name__ == "__main__":
+    root.mainloop()
