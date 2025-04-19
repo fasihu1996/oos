@@ -5,16 +5,15 @@ import urllib.request, urllib.error, certifi, ssl, datetime as dt, sqlite3, thre
 from tkinter import messagebox
 
 # active recordings + progress dict
-active_recordings = {}
-recording_progress = {}
+recordings = {}
 
-def record(url, filename, duration, blocksize):
+def record(url, filename, duration, bitrate):
     """Record audio stream from the given URL."""
     if int(duration) < 1:
         messagebox.showerror("Value Error", "Duration cannot be smaller than 1!")
-    if int(blocksize) < 1:
-        messagebox.showerror("Value Error", "Blocksize cannot be smaller than 1!")
-    if filename is None:
+    if int(bitrate) < 1:
+        messagebox.showerror("Value Error", "Bitrate cannot be smaller than 1!")
+    if filename is None or filename.strip() == "":
         now = dt.datetime.now()
         filename = now.strftime("%Y-%m-%d-%H-%M-%S")
     if not os.path.exists("recordings"):
@@ -23,19 +22,19 @@ def record(url, filename, duration, blocksize):
     ssl_context = ssl.create_default_context(cafile=certifi.where())
     try:
         stream = urllib.request.urlopen(url, context=ssl_context)
-        stream_byterate = 128 * int(stream.headers.get('icy-br'))
+        stream_byterate = int(bitrate) * 1024 // 8  # Convert kbps to bytes per second
         start_time = dt.datetime.now()
-        blocks_target = int(duration) * stream_byterate / int(blocksize)
+        blocks_target = int(duration) * stream_byterate
         blocks_written = 0
         filepath = f"recordings/{filename}.mp3"
 
-        recording_progress[filename] = 0
+        recordings[filename] = 0
 
         with open(filepath, 'wb') as f:
             while blocks_written < blocks_target:
-                f.write(stream.read(int(blocksize)))
-                blocks_written += 1
-                recording_progress[filename] = (blocks_written / blocks_target) * 100
+                f.write(stream.read(1024))  # Read in chunks of 1024 bytes
+                blocks_written += 1024
+                recordings[filename] = (blocks_written / blocks_target) * 100
                 update_status_bar()
 
         conn = sqlite3.connect('recordings.db')
@@ -44,49 +43,50 @@ def record(url, filename, duration, blocksize):
         c.execute('''CREATE TABLE IF NOT EXISTS recordings
                      (identifier INTEGER PRIMARY KEY, url TEXT, filename TEXT, date TEXT, time TEXT, duration INTEGER, bitrate INTEGER)''')
         c.execute("INSERT INTO recordings (url, filename, date, time, duration, bitrate) VALUES (?, ?, ?, ?, ?, ?)",
-                  (url, filename, start_time.date().isoformat(), start_time.time().strftime("%H:%M:%S"), duration, blocksize))
+                  (url, filename, start_time.date().isoformat(), start_time.time().strftime("%H:%M:%S"), duration, bitrate))
         conn.commit()
         conn.close()
 
-        recording_progress.pop(filename)
+        recordings.pop(filename)
         update_status_bar("Recording completed successfully.")
-    except urllib.error.HTTPError:
+    except urllib.error.HTTPError as e:
         messagebox.showerror("HTTP Error", "A HTTP error occurred while attempting to connect to the resource. Please check the URL.")
-    except TypeError:
+        print(e)
+    except TypeError as e:
         messagebox.showerror("Type Error", "The provided URL does not have a valid mp3 stream.")
-    except ValueError:
+        print(e)
+    except ValueError as e:
         messagebox.showerror("Value Error", "The provided URL is not a valid web resource.")
-
+        print(e)
 
 def update_status_bar(message="Ready"):
     """Update the status bar with the progress of active recordings."""
-    if active_recordings:
-        progress_text = " - ".join([f"{filename}: {recording_progress.get(filename, 0):.2f}%" for filename in active_recordings])
+    if recordings:
+        progress_text = " - ".join([f"{filename}: {progress:.2f}%" for filename, progress in recordings.items()])
         status_bar.config(text=f"Recording in progress: {progress_text}")
     else:
         status_bar.config(text=message)
     root.update_idletasks()
 
-def record_in_thread(url, filename, duration, blocksize):
+def record_in_thread(url, filename, duration, bitrate):
     """Run the record function in a separate thread."""
     if not c_dur.get():
         duration = 30
-    if not c_btr.get() or not blocksize.isdigit():
-        blocksize = 128
+    if not c_btr.get() or not bitrate.isdigit():
+        bitrate = 128
 
     # Clear input fields
     url_field.delete(0, "end")
     filename_field.delete(0, "end")
 
-    active_recordings[filename] = 0
+    recordings[filename] = 0
     update_status_bar()
 
     def threaded_record():
         try:
-            record(url, filename, duration, blocksize)
+            record(url, filename, duration, bitrate)
             update_treeview()
         finally:
-            active_recordings.pop(filename)
             update_status_bar()
 
     threading.Thread(target=threaded_record, daemon=True).start()
@@ -140,24 +140,24 @@ def delete_selected_entry():
         filepath = f"recordings/{filename}.mp3"
         if os.path.exists(filepath):
             os.remove(filepath)
+            update_status_bar("File deleted successfully.")
+        else:
+            update_status_bar("File not found locally.")
 
-    update_status_bar("File deleted successfully.")
-    root.after(3000, lambda: update_status_bar())
+    # Avoid overwriting the status message
+    root.after(3000, lambda: update_status_bar("Ready"))
 
 def clear_all_entries():
     """Clear all entries from the Treeview and database."""
     if not tree.get_children():
         messagebox.showinfo("No Entries", "The database is already empty.")
-        return None
+        return
 
     # Confirm action
     if not messagebox.askyesno("Confirm Clear", "Are you sure you want to clear all entries?"):
-        return None
+        return
 
     # Clear database
-    conn = sqlite3.connect('recordings.db')
-    c = conn.cursor()
-
     conn = sqlite3.connect('recordings.db')
     c = conn.cursor()
     c.execute("SELECT filename FROM recordings")
@@ -166,6 +166,7 @@ def clear_all_entries():
     c.execute("DELETE FROM recordings")
     conn.commit()
     conn.close()
+    update_status_bar("All entries cleared successfully.")
 
     # Clear Treeview
     for row in tree.get_children():
@@ -178,8 +179,8 @@ def clear_all_entries():
                 filepath = f"recordings/{file}.mp3"
                 if os.path.exists(filepath):
                     os.remove(filepath)
-    update_status_bar("All entries cleared successfully.")
-    root.after(3000, update_status_bar())
+
+    update_status_bar("Local audio files deleted")
 
 
 root = tk.Tk()
