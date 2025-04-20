@@ -194,7 +194,8 @@ def toggle_theme():
 
 root = tk.Tk()
 root.title("Audiorecorder")
-root.iconbitmap("images/thb.ico")
+icon = tk.PhotoImage(file="images/thb.png")
+root.wm_iconphoto(True, icon)
 root.geometry("900x600")
 sv_ttk.set_theme("dark")
 
