@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import *
-from tkinter.ttk import Combobox, Treeview
-import urllib.request, urllib.error, certifi, ssl, datetime as dt, sqlite3, threading, os
+from tkinter import ttk
+import urllib.request, urllib.error, certifi, ssl, datetime as dt, sqlite3, threading, os, sv_ttk
 from tkinter import messagebox
 
 # active recordings + progress dict
@@ -182,11 +182,21 @@ def clear_all_entries():
 
     update_status_bar("Local audio files deleted")
 
+def toggle_theme():
+    global is_light_mode
+    if is_light_mode:
+        sv_ttk.set_theme("dark")
+        theme_button.config(image=light_mode_icon)
+    else:
+        sv_ttk.set_theme("light")
+        theme_button.config(image=dark_mode_icon)
+    is_light_mode = not is_light_mode
 
 root = tk.Tk()
 root.title("Audiorecorder")
 root.iconbitmap("images/thb.ico")
 root.geometry("900x600")
+sv_ttk.set_theme("dark")
 
 # Configure grid columns to expand dynamically
 root.grid_columnconfigure(0, weight=1)
@@ -194,21 +204,21 @@ root.grid_columnconfigure(1, weight=1)
 root.grid_rowconfigure(5, weight=1)
 
 # URL field
-Label(root, text="URL").grid(row=0, column=0, padx=10, pady=10, sticky="w")
-url_field = Entry(root, width=80)
+ttk.Label(root, text="URL").grid(row=0, column=0, padx=10, pady=10, sticky="w")
+url_field = ttk.Entry(root, width=80)
 url_field.grid(row=0, column=1, padx=10, pady=10, sticky="nsew")
 
 # Filename field
-Label(root, text="Filename").grid(row=1, column=0, padx=10, pady=10, sticky="w")
-filename_field = Entry(root, width=80)
+ttk.Label(root, text="Filename").grid(row=1, column=0, padx=10, pady=10, sticky="w")
+filename_field = ttk.Entry(root, width=80)
 filename_field.grid(row=1, column=1, padx=10, pady=10, sticky="nsew")
 
 # Duration checkbox and spinbox
 c_dur = BooleanVar()
-Checkbutton(root, text="Duration in seconds", variable=c_dur, command=lambda : spinbox_duration.config(state="normal") if c_dur.get() else
+ttk.Checkbutton(root, text="Duration in seconds", variable=c_dur, command=lambda : spinbox_duration.config(state="normal") if c_dur.get() else
             spinbox_duration.config(state="disabled")).grid(row=2, column=0, padx=10, pady=10, sticky="w")
 
-spinbox_duration = Spinbox(root, from_=1, to=120, width=5, state="normal")
+spinbox_duration = ttk.Spinbox(root, from_=1, to=120, width=5, state="normal")
 spinbox_duration.delete(0, "end")
 spinbox_duration.insert(0, "30")
 spinbox_duration.config(state="disabled")
@@ -217,24 +227,24 @@ spinbox_duration.grid(row=2, column=1, padx=10, pady=10, sticky="w")
 # Bitrate checkbox and dropdown
 c_btr = BooleanVar()
 bitrates = ["64","128", "192", "256", "320"]
-Checkbutton(root, text="Bitrate", variable=c_btr, command=lambda : dropdown_bitrate.config(state="normal" if c_btr.get()
+ttk.Checkbutton(root, text="Bitrate", variable=c_btr, command=lambda : dropdown_bitrate.config(state="normal" if c_btr.get()
             else dropdown_bitrate.config(state="disabled"))).grid(row=3, column=0, padx=10, pady=10, sticky="w")
-dropdown_bitrate = Combobox(root, values=bitrates, state="disabled")
+dropdown_bitrate = ttk.Combobox(root, values=bitrates, state="disabled")
 dropdown_bitrate.set("128")
 dropdown_bitrate.grid(row=3, column=1, padx=10, pady=10, sticky="w")
 
-start_button = Button(root, text="Start download", command=lambda: record_in_thread(url_field.get(), filename_field.get(), spinbox_duration.get(), dropdown_bitrate.get()))
+start_button = ttk.Button(root, text="Start download", command=lambda: record_in_thread(url_field.get(), filename_field.get(), spinbox_duration.get(), dropdown_bitrate.get()))
 start_button.grid(row=4, column=0, columnspan=2, pady=10)
 
-delete_button = Button(root, text="Delete Selected", command=delete_selected_entry)
-delete_button.grid(row=4, column=1, pady=10, padx=10, sticky="s")
+delete_button = ttk.Button(root, text="Delete Selected", command=delete_selected_entry)
+delete_button.grid(row=4, column=0, pady=10, padx=(10,5), sticky="e")
 
-clear_button = Button(root, text="Clear All", command=clear_all_entries)
-clear_button.grid(row=4, column=1, pady=10, padx=10, sticky="e")
+clear_button = ttk.Button(root, text="Clear All", command=clear_all_entries)
+clear_button.grid(row=4, column=1, pady=10, padx=(5,10), sticky="w")
 
 
 # Treeview for displaying recordings
-tree = Treeview(root, columns=("id", "url", "filename", "date", "time", "duration", "bitrate"), show="headings", height=10)
+tree = ttk.Treeview(root, columns=("id", "url", "filename", "date", "time", "duration", "bitrate"), show="headings", height=10)
 tree.grid(row=5, column=0, columnspan=2, padx=10, pady=10, sticky="nsew")
 # Define column headers and widths
 tree.heading("id", text="ID")
@@ -256,8 +266,14 @@ initialize_database()
 update_treeview()
 
 # Add a status bar at the bottom
-status_bar = Label(root, text="Ready", anchor="w", relief="sunken")
+status_bar = ttk.Label(root, text="Ready", anchor="w", relief="sunken", padding=(5,0))
 status_bar.grid(row=6, column=0, columnspan=2, sticky="nsew")
+
+light_mode_icon = tk.PhotoImage(file="images/light.png")
+dark_mode_icon = tk.PhotoImage(file="images/dark.png")
+is_light_mode = sv_ttk.get_theme() == "light"
+theme_button = ttk.Button(root, image=dark_mode_icon if is_light_mode else light_mode_icon, command=toggle_theme)
+theme_button.grid(row=6, column=1, sticky="e", ipadx=1, ipady=1)
 
 if __name__ == "__main__":
     root.mainloop()
