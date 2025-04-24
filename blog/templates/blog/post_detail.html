@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ post.title }}</title>
+</head>
+<body>
+    <h1>{{ post.title }}</h1>
+    <p>{{ post.content }}</p>
+    <small>Erstellt am: {{ post.created_at }}</small>
+
+    <h2>Kommentare</h2>
+    <ul>
+        {% for comment in comments %}
+            <li>
+                {{ comment.content }} ({{ comment.created_at }})
+            </li>
+        {% empty %}
+            <li>Keine Kommentare vorhanden.</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Neuen Kommentar hinzufügen</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Kommentar absenden</button>
+    </form>
+
+    <a href="{% url 'post_list' %}">Zurück zur Übersicht</a>
+</body>
+</html>
