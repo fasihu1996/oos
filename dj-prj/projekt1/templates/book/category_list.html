@@ -1,0 +1,20 @@
+{% extends "book/base.html" %}
+{% load bootstrap4 %}
+
+{% block content %}
+    <a href="{% url 'add_author' %}" class="btn btn-primary">Autor hinzufügen</a>
+    <table class="table table-striped">
+        <thead class="thead-dark">
+        <tr>
+            <th>Category Names</th>
+        </tr>
+        </thead>
+
+
+        {% for category in object_list %}
+            <tr>
+                <td>{{ category.name }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endblock %}
