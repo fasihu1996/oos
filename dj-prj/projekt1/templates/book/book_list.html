@@ -1,0 +1,25 @@
+{% extends "book/base.html" %}
+{% block content %}
+    <a href="{% url 'add_author' %}" class="btn btn-primary">Buch hinzufügen</a>
+    <a href="{% url 'author_list' %}" class="btn btn-primary">Autorenliste</a>
+    <table class="table table-striped">
+        <thead class="thead-dark">
+        <tr>
+            <th>ISBN</th>
+            <th>Title</th>
+            <th>Authors</th>
+            <th>Category</th>
+        </tr>
+        </thead>
+
+
+        {% for book in books %}
+            <tr>
+                <td>{{ book.isbn }}</td>
+                <td>{{ book.title }}</td>
+                <td>{{ book.authors.all|join:", " }}</td>
+                <td>{{ book.category }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endblock %}
