@@ -1,23 +1,29 @@
 # README
 
 ## Purpose
+
 This repository contains all the code created for the course "Objektorientierte Skriptsprachen".
 
 ## Organization
+
 All files starting with "afg" are solutions for the various exercise sheets. The categories are as follows:
+
 - afg1: Python introduction
 - afg2: Functions and Data types
 - afg3: Classes, Modules and Packages
 - afg4: Testing, Databases, Lambda, CLI
 - afg5: Pygame
 - afg6: Tkinter
+- Woche 7 Django Projekte
+- afg8: Application Scripting und Datenanalyse
 
 - "cli_audiorecorder.py" is part of the first bonus point assignment.
 - "esa3_gui_recorder.py" is the GUI implementation of the audio recorder using tkinter and some
-additional theming.
+  additional theming.
 
 ## Usage
-All requirements are periodically frozen into the "requirements.txt" file. Make sure to run 
+
+All requirements are periodically frozen into the "requirements.txt" file. Make sure to run
 
 `python -m venv .venv` and then pick based on your OS `.venv/Scripts/activate` for Windows and
 `source .venv/bin/activate` for UNIX. Finally, run `pip install -r requirements.txt`
