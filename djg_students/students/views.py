@@ -6,7 +6,8 @@ from django.urls import reverse_lazy
 from students.forms import *
 from students.models import *
 
-
+def get_homepage(request):
+    return render(request, "students/homepage.html")
 # Create your views here.
 def get_all_students(request):
     students = Student.objects.all().order_by("lname", "fname")

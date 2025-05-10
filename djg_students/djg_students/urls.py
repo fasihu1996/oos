@@ -20,6 +20,7 @@ from django.urls import path
 from students.views import *
 
 urlpatterns = [
+    path('', get_homepage, name="homepage"),
     path('students/', get_all_students, name="student_list"),
     path('students/add/', student_details, name="add_student"),
     path('students/add/<int:pk>', student_details, name="edit_student"),
