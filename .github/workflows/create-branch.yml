@@ -2,7 +2,7 @@ name: Create Weekly Branch
 
 on:
   schedule:
-    - cron: '0 6 * * 0'  # Every Sunday at 08:00 UTC
+    - cron: '0 0 14 ? * WED *'  # Every Wednesday at 2pm
 
 jobs:
   create-branch:
