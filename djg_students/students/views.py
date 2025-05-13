@@ -1,13 +1,11 @@
 from django.contrib import messages
-from django.http import HttpResponseRedirect
-from django.shortcuts import render
+from django.http import HttpResponseRedirect, FileResponse, HttpResponse
+from django.shortcuts import render, get_object_or_404
 from django.urls import reverse_lazy
-import json
-import tempfile
+import tempfile, functools
 import subprocess
-from django.http import FileResponse, HttpResponse
-from django.shortcuts import get_object_or_404
 import os
+
 
 from students.forms import *
 from students.models import *
@@ -57,10 +55,13 @@ def lecture_details(request, pk=None):
             messages.error(request, "The form data is incorrect.")
     else:
         form = LectureForm(instance=lecture)
+    
+    enrolled_students = lecture.enrolled_students.all() if lecture.pk else []
 
     return render(request, "students/lecture_details.html", {"page_title": "Add Lecture",
                                                              "form": form,
-                                                             "lecture": lecture})
+                                                             "lecture": lecture,
+                                                             "enrolled_students": enrolled_students})
 
 def student_details(request, pk=None):
     if pk:
@@ -83,34 +84,42 @@ def student_details(request, pk=None):
                                                              "form": form})
 
 def generate_lecture_pdf(request, pk):
-    # Get lecture and enrolled students
+    """
+    Generate a PDF report for a lecture using Typst and return it as a download.
+    """
     lecture = get_object_or_404(Lecture, pk=pk)
-    students = Student.objects.filter(lectures=lecture) if hasattr(Student, 'lectures') else []
+    students = lecture.enrolled_students.all()
 
-    # Build Typst data structure as valid Typst code (use parentheses for Typst objects)
-    students_typst = ",\n    ".join(
-        f'(lname: "{typst_escape(s.lname)}", fname: "{typst_escape(s.fname)}", email: "{typst_escape(s.email)}")'
-        for s in students
+    # Generate complete table rows instead of student records
+    if students:
+        table_rows = "\n      ".join(
+            f'[{typst_escape(s.lname)}], [{typst_escape(s.fname)}], [{typst_escape(s.email).replace("@", "\\\\@")}],'
+            for s in students
+        )
+    else:
+        table_rows = ""
+
+    typst_data = (
+        f'(\n  title: "{typst_escape(lecture.title)}",\n'
+        f'  description: "{typst_escape(lecture.description)}",\n'
+        f'  student_count: {len(students)},\n'
+        f'  table_rows: "{table_rows}"\n)'
     )
-    typst_data = f'(\n  title: "{typst_escape(lecture.title)}",\n  description: "{typst_escape(lecture.description)}",\n  student_count: {len(students)},\n  students: [\n    {students_typst}\n  ]\n)'
 
-    # Read Typst template from file
-    template_path = os.path.join(os.path.dirname(__file__), '..', 'templates', 'typst', 'lecture_report.typ')
+    template_path = os.path.join(
+        os.path.dirname(__file__), '..', 'templates', 'typst', 'lecture_report.typ'
+    )
     with open(template_path, encoding='utf-8') as f:
         typst_template = f.read()
 
-    # Insert typst_data into template
     typst_content = typst_template.format(typst_data=typst_data)
 
-    # Write Typst content to a temp file (ensure UTF-8 encoding)
     with tempfile.NamedTemporaryFile(suffix='.typ', mode='w', encoding='utf-8', delete=False) as typ_file:
         typ_file.write(typst_content)
         typ_file_path = typ_file.name
 
-    # Print Typst content for debugging
     print("Generated Typst content:\n", typst_content)
 
-    # Prepare output PDF file
     pdf_file_handle, pdf_file_path = tempfile.mkstemp(suffix='.pdf')
     os.close(pdf_file_handle)
 
@@ -127,12 +136,10 @@ def generate_lecture_pdf(request, pk):
         pdf_file = open(pdf_file_path, 'rb')
         response = FileResponse(pdf_file, content_type='application/pdf')
         response['Content-Disposition'] = f'attachment; filename="{lecture.title}_report.pdf"'
-        # Clean up after response is closed
         def cleanup_file(file_obj, file_path):
             file_obj.close()
             if os.path.exists(file_path):
                 os.unlink(file_path)
-        import functools
         response.close = functools.partial(cleanup_file, pdf_file, pdf_file_path)
         return response
     except subprocess.CalledProcessError as e:
