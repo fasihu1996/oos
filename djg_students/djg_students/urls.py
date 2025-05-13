@@ -28,5 +28,6 @@ urlpatterns = [
     path('lectures/add/', lecture_details, name="add_lecture"),
     path('lectures/add/<int:pk>', lecture_details, name="edit_lecture"),
     path('lectures/add/<int:pk>/delete/', delete_lecture, name="delete_lecture"),
+    path('lectures/<int:pk>/pdf/', generate_lecture_pdf, name="lecture_pdf"),
     path('admin/', admin.site.urls),
 ]
