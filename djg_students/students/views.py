@@ -20,14 +20,14 @@ def get_homepage(request):
 def get_all_students(request):
     students = Student.objects.all().order_by("lname", "fname")
 
-    return render(request, "students/student_list.html", {"page_title": "Studenten",
+    return render(request, "students/student_list.html", {"page_title": "Students",
                                                           "students": students})
 
 
 def get_all_lectures(request):
     lectures = Lecture.objects.all().order_by("title")
 
-    return render(request, "students/lecture_list.html", {"page_title": "Vorlesungen",
+    return render(request, "students/lecture_list.html", {"page_title": "Lectures",
                                                           "lectures": lectures})
 
 def delete_lecture(request, pk=None):
@@ -36,8 +36,16 @@ def delete_lecture(request, pk=None):
         lecture.delete()
         messages.success(request, "Lecture deleted")
     lectures = Lecture.objects.all().order_by("title")
-    return render(request, "students/lecture_list.html", {"page_title": "Vorlesungen",
+    return render(request, "students/lecture_list.html", {"page_title": "Lectures",
                                                           "lectures": lectures})
+
+def delete_student(request, pk=None):
+    if pk:
+        student = Student.objects.get(pk=pk)
+        student.delete()
+        messages.success(request, "Student deleted")
+    students = Student.objects.all().order_by("lname", "fname")
+    return render(request, "students/student_list.html", {"page_title": "Students", "students": students})
 
 def lecture_details(request, pk=None):
     if pk:

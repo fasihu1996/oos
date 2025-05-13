@@ -24,6 +24,7 @@ urlpatterns = [
     path('students/', get_all_students, name="student_list"),
     path('students/add/', student_details, name="add_student"),
     path('students/add/<int:pk>', student_details, name="edit_student"),
+    path('students/add/<int:pk>/delete/', delete_student, name="delete_student"),
     path('lectures/', get_all_lectures, name="lecture_list"),
     path('lectures/add/', lecture_details, name="add_lecture"),
     path('lectures/add/<int:pk>', lecture_details, name="edit_lecture"),
