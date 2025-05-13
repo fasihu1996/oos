@@ -33,14 +33,7 @@
   if lecture_data.student_count == 0 {{
     [No students are currently enrolled in this lecture.]
   }} else {{
-    let student_table = table(
-      columns: (1fr, 1fr, 2fr),
-      inset: 8pt,
-      [*Last Name*], [*First Name*], [*Email*],
-      lecture_data.table_rows
-    )
-
-    student_table
+    lecture_data.table_rows
   }}
 }}
 

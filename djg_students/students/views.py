@@ -90,20 +90,29 @@ def generate_lecture_pdf(request, pk):
     lecture = get_object_or_404(Lecture, pk=pk)
     students = lecture.enrolled_students.all()
 
-    # Generate complete table rows instead of student records
+    # Create a complete table in Typst syntax
     if students:
-        table_rows = "\n      ".join(
-            f'[{typst_escape(s.lname)}], [{typst_escape(s.fname)}], [{typst_escape(s.email).replace("@", "\\\\@")}],'
-            for s in students
-        )
+        # Generate the header row - REMOVED EMAIL COLUMN
+        rows = ['[*Last Name*], [*First Name*]']
+        
+        # Generate a row for each student - REMOVED EMAIL
+        for s in students:
+            row = f'[{typst_escape(s.lname)}], [{typst_escape(s.fname)}]'
+            rows.append(row)
+        
+        # Join rows with commas
+        rows_code = ",\n      ".join(rows)
+        
+        # Create a complete table definition - CHANGED COLUMNS FROM 3 TO 2
+        table_typst = f'table(\n    columns: (1fr, 1fr),\n    inset: 8pt,\n    {rows_code}\n  )'
     else:
-        table_rows = ""
+        table_typst = '[No students are currently enrolled in this lecture.]'
 
     typst_data = (
         f'(\n  title: "{typst_escape(lecture.title)}",\n'
         f'  description: "{typst_escape(lecture.description)}",\n'
         f'  student_count: {len(students)},\n'
-        f'  table_rows: "{table_rows}"\n)'
+        f'  table_rows: {table_typst}\n)'
     )
 
     template_path = os.path.join(
@@ -137,10 +146,22 @@ def generate_lecture_pdf(request, pk):
         response = FileResponse(pdf_file, content_type='application/pdf')
         response['Content-Disposition'] = f'attachment; filename="{lecture.title}_report.pdf"'
         def cleanup_file(file_obj, file_path):
-            file_obj.close()
+            if hasattr(file_obj, '_file') and not file_obj._file.closed:
+                file_obj._file.close()
+            elif hasattr(file_obj, 'close') and not getattr(file_obj, 'closed', False):
+                file_obj.close()
+                
             if os.path.exists(file_path):
                 os.unlink(file_path)
-        response.close = functools.partial(cleanup_file, pdf_file, pdf_file_path)
+                
+        # Use a custom close wrapper to avoid recursion
+        original_close = response.close
+        def safe_close():
+            cleanup_file(pdf_file, pdf_file_path)
+            if callable(original_close):
+                original_close()
+        
+        response.close = safe_close
         return response
     except subprocess.CalledProcessError as e:
         print('Typst error output:', e.stderr)
