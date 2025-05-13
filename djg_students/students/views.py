@@ -147,7 +147,7 @@ def generate_lecture_pdf(request, pk):
         # Serve the PDF
         pdf_file = open(pdf_fp, 'rb')
         response = FileResponse(pdf_file, content_type='application/pdf')
-        response['Content-Disposition'] = f'attachment; filename="{lecture.title}_report.pdf"'
+        response['Content-Disposition'] = f'inline; attachment; filename="{lecture.title}_report.pdf"'
         
         return response
     except subprocess.CalledProcessError as e:
