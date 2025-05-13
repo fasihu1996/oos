@@ -8,6 +8,11 @@ class LectureForm(ModelForm):
         exclude = ()
         labels = {"title": "Title",
                   "description": "Description"}
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if 'enrolled_students' in self.fields:
+            self.fields['enrolled_students'].required = False
 
 class StudentForm(ModelForm):
     class Meta:
