@@ -1,19 +1,19 @@
 {% load bootstrap4 %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-100">
 <head>
     <meta charset="UTF-8">
     <title>{{ page_title }}</title>
     {% bootstrap_css %}
     {% bootstrap_javascript jquery="full" %}
 </head>
-<body>
+<body class="d-flex flex-column h-100">
 {% bootstrap_messages %}
 
 {% block header %}
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
     <div class="container-fluid">
-        <a class="navbar-brand" href="#" style="font-size: 1.5rem;">Studentenverwaltung</a>
+        <a class="navbar-brand" style="font-size: 1.5rem;" href={% url "homepage" %}>Student management system</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup"
                 aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -21,22 +21,27 @@
         <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
             <div class="navbar-nav">
                 <a class="nav-link {% if request.resolver_match.url_name == 'lecture_list' %}active{% endif %}" aria-current="page" href={% url "lecture_list" %} style="font-size: 1.25rem;">Lectures</a>
-                <a class="nav-link {% if request.resolver_match.url_name == 'student_list' %}active{% endif %}" href={% url "student_list" %} style="font-size: 1.25rem;">Studenten</a>
+                <a class="nav-link {% if request.resolver_match.url_name == 'student_list' %}active{% endif %}" href={% url "student_list" %} style="font-size: 1.25rem;">Students</a>
             </div>
         </div>
     </div>
 </nav>
-
-
 {% endblock %}
-<h2>{{ page_title }}</h2>
-{% block content %}
-    Dummy aus basis-Template
-{% endblock %}
+
+<main class="flex-shrink-0">
+    <div class="container-fluid mt-4">
+        <h2>{{ page_title }}</h2>
+        {% block content %}
+        {% endblock %}
+    </div>
+</main>
 
 {% block footer %}
-    {# z.B. für Impressum #}
-    <p>Impressum</p>
+<footer class="footer mt-auto py-3 bg-light">
+    <div class="container-fluid">
+        <p class="text-muted mb-0">Crated by Fasih Uddin for OOSL 2025</p>
+    </div>
+</footer>
 {% endblock %}
 </body>
 </html>

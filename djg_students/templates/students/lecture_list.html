@@ -2,12 +2,13 @@
 {% load bootstrap4 %}
 
 {% block content %}
-    <a href="{% url 'add_lecture' %}" class="btn btn-primary">Vorlesung hinzufügen</a>
+    <a href="{% url 'add_lecture' %}" class="btn btn-primary">Add Lecture</a>
     <table class="table table-striped">
         <thead class="thead-dark">
         <tr>
             <th>Title</th>
             <th>Description</th>
+            <th>Actions</th>
         </tr>
         </thead>
 
@@ -16,7 +17,11 @@
             <tr>
                 <td>{{ lecture.title }}</td>
                 <td>{{ lecture.description }}</td>
-                <td><a href="{% url 'edit_lecture' pk=lecture.id %}" class="btn btn-primary btn-sm">Edit</a></td>
+                <td>
+                    <a href="{% url 'edit_lecture' pk=lecture.id %}" class="btn btn-primary btn-sm">Edit</a>
+                    <a href="{% url 'delete_lecture' pk=lecture.id %}" class="btn btn-secondary btn-sm">Delete</a>
+                    <a href="{% url 'lecture_pdf' pk=lecture.id %}" class="btn btn-info btn-sm">PDF</a>
+                </td>
             </tr>
         {% endfor %}
     </table>

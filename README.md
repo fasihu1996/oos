@@ -1,5 +1,7 @@
 # README
 
+[![gitleaks](https://github.com/fasihu1996/oos/actions/workflows/github-actions.yml/badge.svg)](https://github.com/fasihu1996/oos/actions/workflows/github-actions.yml)
+
 ## Purpose
 
 This repository contains all the code created for the course "Objektorientierte Skriptsprachen".
