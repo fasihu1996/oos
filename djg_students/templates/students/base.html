@@ -13,7 +13,7 @@
 {% block header %}
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
     <div class="container-fluid">
-        <a class="navbar-brand" style="font-size: 1.5rem;" href={% url "homepage" %}>Studentenverwaltung</a>
+        <a class="navbar-brand" style="font-size: 1.5rem;" href={% url "homepage" %}>Student management system</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup"
                 aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -21,7 +21,7 @@
         <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
             <div class="navbar-nav">
                 <a class="nav-link {% if request.resolver_match.url_name == 'lecture_list' %}active{% endif %}" aria-current="page" href={% url "lecture_list" %} style="font-size: 1.25rem;">Lectures</a>
-                <a class="nav-link {% if request.resolver_match.url_name == 'student_list' %}active{% endif %}" href={% url "student_list" %} style="font-size: 1.25rem;">Studenten</a>
+                <a class="nav-link {% if request.resolver_match.url_name == 'student_list' %}active{% endif %}" href={% url "student_list" %} style="font-size: 1.25rem;">Students</a>
             </div>
         </div>
     </div>
@@ -39,7 +39,7 @@
 {% block footer %}
 <footer class="footer mt-auto py-3 bg-light">
     <div class="container-fluid">
-        <p class="text-muted mb-0">Erstellt von Fasih Uddin für OOSL 2025</p>
+        <p class="text-muted mb-0">Crated by Fasih Uddin for OOSL 2025</p>
     </div>
 </footer>
 {% endblock %}
