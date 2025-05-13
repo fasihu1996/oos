@@ -2,7 +2,7 @@ from django.contrib import messages
 from django.http import HttpResponseRedirect, FileResponse, HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse_lazy
-import tempfile, functools
+from datetime import datetime
 import subprocess
 import os
 
@@ -89,21 +89,24 @@ def generate_lecture_pdf(request, pk):
     """
     lecture = get_object_or_404(Lecture, pk=pk)
     students = lecture.enrolled_students.all()
-
+    
+    downloads_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'downloads')
+    os.makedirs(downloads_dir, exist_ok=True)
+    
+    # Generate filenames with timestamp to avoid overwrites
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    typ_fp = os.path.join(downloads_dir, f'lecture_{lecture.pk}_{timestamp}.typ')
+    pdf_fp = os.path.join(downloads_dir, f'lecture_{lecture.pk}_{timestamp}.pdf')
+    
     # Create a complete table in Typst syntax
     if students:
-        # Generate the header row - REMOVED EMAIL COLUMN
         rows = ['[*Last Name*], [*First Name*]']
-        
-        # Generate a row for each student - REMOVED EMAIL
         for s in students:
             row = f'[{typst_escape(s.lname)}], [{typst_escape(s.fname)}]'
             rows.append(row)
         
-        # Join rows with commas
         rows_code = ",\n      ".join(rows)
         
-        # Create a complete table definition - CHANGED COLUMNS FROM 3 TO 2
         table_typst = f'table(\n    columns: (1fr, 1fr),\n    inset: 8pt,\n    {rows_code}\n  )'
     else:
         table_typst = '[No students are currently enrolled in this lecture.]'
@@ -123,50 +126,24 @@ def generate_lecture_pdf(request, pk):
 
     typst_content = typst_template.format(typst_data=typst_data)
 
-    with tempfile.NamedTemporaryFile(suffix='.typ', mode='w', encoding='utf-8', delete=False) as typ_file:
-        typ_file.write(typst_content)
-        typ_file_path = typ_file.name
-
-    print("Generated Typst content:\n", typst_content)
-
-    pdf_file_handle, pdf_file_path = tempfile.mkstemp(suffix='.pdf')
-    os.close(pdf_file_handle)
-
+    with open(typ_fp, 'w', encoding='utf-8') as f:
+        f.write(typst_content)
+    
     try:
-        result = subprocess.run(
-            ['typst', 'compile', typ_file_path, pdf_file_path],
+        subprocess.run(
+            ['typst', 'compile', typ_fp, pdf_fp],
             check=True,
             capture_output=True,
             text=True
         )
-        print('Typst stdout:', result.stdout)
-        print('Typst stderr:', result.stderr)
-        os.unlink(typ_file_path)
-        pdf_file = open(pdf_file_path, 'rb')
+        # Serve the PDF
+        pdf_file = open(pdf_fp, 'rb')
         response = FileResponse(pdf_file, content_type='application/pdf')
         response['Content-Disposition'] = f'attachment; filename="{lecture.title}_report.pdf"'
-        def cleanup_file(file_obj, file_path):
-            if hasattr(file_obj, '_file') and not file_obj._file.closed:
-                file_obj._file.close()
-            elif hasattr(file_obj, 'close') and not getattr(file_obj, 'closed', False):
-                file_obj.close()
-                
-            if os.path.exists(file_path):
-                os.unlink(file_path)
-                
-        # Use a custom close wrapper to avoid recursion
-        original_close = response.close
-        def safe_close():
-            cleanup_file(pdf_file, pdf_file_path)
-            if callable(original_close):
-                original_close()
         
-        response.close = safe_close
         return response
     except subprocess.CalledProcessError as e:
         print('Typst error output:', e.stderr)
-        if os.path.exists(typ_file_path):
-            os.unlink(typ_file_path)
-        if os.path.exists(pdf_file_path):
-            os.unlink(pdf_file_path)
+        if os.path.exists(typ_fp):
+            os.unlink(typ_fp)
         return HttpResponse(f"Error generating PDF: {str(e)}", status=500)
