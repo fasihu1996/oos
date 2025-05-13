@@ -1,5 +1,5 @@
 #let lecture_report(lecture_data) = {{
-  set document(title: lecture_data.title, author: "Studentenverwaltung")
+  set document(title: lecture_data.title, author: "Student management system")
   set page(
     paper: "a4",
     margin: (x: 2.5cm, y: 2cm),
