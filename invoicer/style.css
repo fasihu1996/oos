@@ -1,0 +1,27 @@
+.badge-beverage {
+    background-color: #0A467F;
+}
+
+.badge-barrel {
+    background-color: #18324D;
+}
+
+.badge-service {
+    background-color: #4D6D8C;
+}
+
+.badge-equipment {
+    background-color: #6198C7;
+}
+
+@media (min-width: 1000px) {
+    #pickup-table {
+        overflow: hidden;
+    }
+}
+
+@media (max-width: 999px) {
+    #pickup-table {
+        overflow: auto;
+    }
+}
